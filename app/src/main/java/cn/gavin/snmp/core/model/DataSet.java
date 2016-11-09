@@ -22,7 +22,7 @@ import java.util.Set;
  * It will store num value and the time stamp.
  * @param <T> Should be Double, Integer, Float, Long.
  */
-public class DataSet<T extends Number> {
+public class DataSet<T extends Object> {
     private Map<Long, T> date;
     private Policy policy;
     private static HashSet<DataSet> dataSets = new HashSet<DataSet>();

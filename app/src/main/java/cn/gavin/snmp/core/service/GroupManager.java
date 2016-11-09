@@ -17,7 +17,8 @@ public abstract class GroupManager {
     Group createGroup(String name){
         Group group = new Group();
         group.setName(name);
-        group.setUuid(UUID.randomUUID().toString());
+        group.setUuid(null);
         return group;
     }
+    public abstract Group retrieveGroupData(Group group);
 }

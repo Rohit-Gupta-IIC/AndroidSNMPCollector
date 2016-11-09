@@ -33,4 +33,6 @@ public abstract class DeviceManager {
     public List<DeviceImp> discoveryDevicesByIPRange(){
         return null;
     }
+
+    public abstract DeviceImp save(DeviceImp device);
 }

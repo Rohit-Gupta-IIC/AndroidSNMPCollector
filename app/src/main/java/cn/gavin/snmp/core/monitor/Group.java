@@ -1,5 +1,6 @@
 package cn.gavin.snmp.core.monitor;
 
+import cn.gavin.snmp.core.model.DeviceImp;
 import cn.gavin.snmp.core.model.OIDImp;
 import cn.gavin.snmp.core.model.Oid;
 
@@ -13,6 +14,7 @@ public class Group implements Monitor {
     private String name;
     private String uuid;
     private Set<OIDImp> oids;
+    private DeviceImp device;
     @Override
     public Set<Oid> getOIDs() {
         HashSet<Oid> set = new HashSet<Oid>(oids);
@@ -45,5 +47,13 @@ public class Group implements Monitor {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public DeviceImp getDevice() {
+        return device;
+    }
+
+    public void setDevice(DeviceImp device) {
+        this.device = device;
     }
 }
