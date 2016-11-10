@@ -2,6 +2,8 @@ package cn.gavin.snmp.core.model;
 
 import java.util.List;
 
+import cn.gavin.snmp.MainController;
+
 /**
  * Created by gluo on 11/7/2016.
  */
@@ -17,11 +19,11 @@ public class DeviceImp extends Device {
         super(ip);
     }
 
-    public void discovery(){
+    public void discovery() {
         sysId = null;
         Oid sys = snmp.get(new Oid(SYSOBJECTID));
         sysId = new StringDataSet(SYSOBJECTID);
-        sysId.appendData(System.currentTimeMillis(),sys.getOidValue());
+        sysId.appendData(System.currentTimeMillis(), sys.getOidValue());
     }
 
     public String getId() {
@@ -32,12 +34,12 @@ public class DeviceImp extends Device {
         this.id = id;
     }
 
-    public StringDataSet getSysId(){
+    public StringDataSet getSysId() {
         return sysId;
     }
 
-    public synchronized void addSysIdValue(long time, String value){
-        if(sysId == null){
+    public synchronized void addSysIdValue(long time, String value) {
+        if (sysId == null) {
             sysId = new StringDataSet(SYSOBJECTID);
         }
         sysId.appendData(time, value);
@@ -51,19 +53,28 @@ public class DeviceImp extends Device {
         this.groupNames = groupNames;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getName() {
         return name;
     }
 
-    public String getCommunity(){
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCommunity() {
         return communityId;
     }
 
     public void setCommunity(String communityId) {
         this.communityId = communityId;
+    }
+
+    public void doCollection() {
+        List<OIDImp> oidByDevice = MainController.getOIDManger().getOidByDevice(getId());
+        addOids(oidByDevice.toArray(new Oid[oidByDevice.size()]));
+        super.doCollection();
+        for(OIDImp oid : oidByDevice){
+            MainController.getOIDManger().saveValue(oid, getId());
+        }
     }
 }

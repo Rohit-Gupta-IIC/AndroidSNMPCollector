@@ -1,5 +1,7 @@
 package cn.gavin.snmp.core.service;
 
+import android.content.Context;
+
 import cn.gavin.snmp.core.model.DeviceImp;
 import cn.gavin.snmp.core.model.SNMPParameter;
 import cn.gavin.snmp.core.model.SNMPVersion;
@@ -10,7 +12,11 @@ import java.util.List;
 /**
  * Created by gluo on 11/7/2016.
  */
-public abstract class DeviceManager {
+public abstract class DeviceManager extends Manager {
+    public DeviceManager(Context context) {
+        super(context);
+    }
+
     public abstract DeviceImp getDeviceByName(String name);
     public abstract DeviceImp getDeviceByIP(String ip);
     public abstract List<DeviceImp> getAllDevices();
@@ -35,4 +41,6 @@ public abstract class DeviceManager {
     }
 
     public abstract DeviceImp save(DeviceImp device);
+
+    public abstract void delete(DeviceImp deviceImp);
 }

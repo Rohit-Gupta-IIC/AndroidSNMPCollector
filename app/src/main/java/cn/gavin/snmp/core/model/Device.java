@@ -133,6 +133,15 @@ public class Device implements Runnable {
         }
     }
 
+    public void addOids(List<Oid> oids){
+        if(oids!=null && !oids.isEmpty()){
+            if (oids.size() > 0 && this.oids == null) {
+                this.oids = new ArrayList<Oid>(oids.size());
+            }
+            this.oids.addAll(oids);
+        }
+    }
+
     public int getPort() {
         return this.snmpParameter.getPort();
     }

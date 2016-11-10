@@ -18,12 +18,9 @@ import cn.gavin.snmp.core.model.SNMPVersion;
  * Created by gluo on 11/7/2016.
  */
 public class DeviceManager extends cn.gavin.snmp.core.service.DeviceManager {
-    private Context context;
-    private DBHelper dbHelper;
 
     public DeviceManager(Context context) {
-        this.context = context;
-        dbHelper = DBHelper.getDbHelper(context);
+        super(context);
     }
 
     @Override
@@ -142,11 +139,18 @@ public class DeviceManager extends cn.gavin.snmp.core.service.DeviceManager {
             update.append("retry=").append(device.getSnmpParameter().getRetry()).append(",");
             update.append("timeout=").append(device.getSnmpParameter().getTimeout()).append(",");
             update.append("port=").append(device.getSnmpParameter().getPort()).append(",");
-            update.append("trap_port=").append(device.getSnmpParameter().getTrapPort()).append(",");
+            update.append("trap_port=").append(device.getSnmpParameter().getTrapPort());
             update.append(" where device_id = '").append(device.getId());
             dbHelper.execSQL(update.toString());
         }
         return device;
+    }
+
+    @Override
+    public void delete(DeviceImp deviceImp) {
+        dbHelper.execSQL("delete from device where device_id = '" + deviceImp.getId() + "'");
+        MainController.getOIDManger().deleteValueByDevice(deviceImp.getId());
+        dbHelper.execSQL("delete from device_group where device_id = '" + deviceImp.getId() + "'");
     }
 
 

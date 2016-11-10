@@ -12,6 +12,7 @@ package cn.gavin.snmp.core.model;
 import cn.gavin.snmp.core.policy.DefaultPolicy;
 import cn.gavin.snmp.core.policy.Policy;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -98,5 +99,9 @@ public class DataSet<T extends Object> {
     
     public T getLatestData(){
     	return latest;
+    }
+
+    public Long getLatestTime(){
+        return new ArrayList<Long>(getTimes()).get(getTimes().size() - 1);
     }
 }
