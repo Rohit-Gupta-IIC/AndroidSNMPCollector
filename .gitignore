@@ -89,4 +89,6 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-.idea/
+.idea
+app/libs/
+app/build/

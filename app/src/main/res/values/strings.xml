@@ -23,4 +23,11 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="add_device_title">Add SNMP Device</string>
+    <string name="identity_hint">IpAddress or host name</string>
+    <string name="alias_hint">Alias name for device(optional)</string>
+    <string name="community_hint">community wording</string>
+    <string name="auth_hint">Input auth password</string>
+    <string name="priv_hint">Input privcy password</string>
+    <string name="submit_button_text">Submit</string>
 </resources>
