@@ -21,19 +21,21 @@ import cn.gavin.snmp.core.service.OIDManager;
  * Created by gluo on 11/9/2016.
  */
 public class MainController {
-    private static MainController mainController = new MainController();
+    private static MainController mainController;
     private Context context;
     private DeviceManager deviceManager;
     private GroupManager groupManager;
     private OIDManager oidManager;
 
+    private MainController(Context context){
+        this.context = context;
+        deviceManager = new cn.gavin.snmp.db.DeviceManager(context);
+        groupManager = new cn.gavin.snmp.db.GroupManager(context);
+        oidManager = new cn.gavin.snmp.db.OIDManager(context);
+    }
     public synchronized static MainController init(Context context) {
         if (mainController == null) {
-            mainController = new MainController();
-            mainController.context = context;
-            mainController.deviceManager = new cn.gavin.snmp.db.DeviceManager(context);
-            mainController.groupManager = new cn.gavin.snmp.db.GroupManager(context);
-            mainController.oidManager = new cn.gavin.snmp.db.OIDManager(context);
+            mainController = new MainController(context);
         }
         return mainController;
     }
@@ -58,6 +60,7 @@ public class MainController {
         DeviceImp device = new DeviceImp(ip);
         try {
             device.initDevice(parameter);
+            device.setName(ip);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -74,7 +77,7 @@ public class MainController {
 
     public SNMPParameter createParameter(@NonNull SNMPVersion version, @Nullable String community, @Nullable Protocol authProc, @Nullable String authString, @Nullable Protocol privProc, @Nullable String privString) {
         SNMPParameter parameter = new SNMPParameter();
-        parameter.setVersion(SNMPVersion.V3);
+        parameter.setVersion(version);
         parameter.setAuthProtocol(authProc);
         parameter.setAuthentication(authString);
         parameter.setPrivacyProtocol(privProc);
@@ -130,5 +133,9 @@ public class MainController {
             devices.add(device);
         }
         return devices;
+    }
+
+    public Context getContext() {
+        return context;
     }
 }

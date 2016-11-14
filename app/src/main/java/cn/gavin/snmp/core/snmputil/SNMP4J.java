@@ -185,13 +185,17 @@ public class SNMP4J implements SNMP {
         pdu.add(new VariableBinding(oid4J));
         try {
             ResponseEvent response = snmp.getNext(pdu, target);
-            for (VariableBinding vb : response.getResponse().toArray()) {
-                Variable variable = vb.getVariable();
-                if (vb.getOid().startsWith(oid4J)) {
-                    setValueAndType(oid, variable);
-                } else {
-                    oid.setValueType(OIDValueType.ERROR);
+            if(response!=null && response.getResponse()!=null) {
+                for (VariableBinding vb : response.getResponse().toArray()) {
+                    Variable variable = vb.getVariable();
+                    if (vb.getOid().startsWith(oid4J)) {
+                        setValueAndType(oid, variable);
+                    } else {
+                        oid.setValueType(OIDValueType.ERROR);
+                    }
                 }
+            }else{
+                oid.setValueType(OIDValueType.ERROR);
             }
         } catch (IOException e) {
             oid.setValueType(OIDValueType.ERROR);
