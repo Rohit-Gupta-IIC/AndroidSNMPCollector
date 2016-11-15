@@ -8,13 +8,9 @@ import java.util.List;
 import java.util.UUID;
 
 import cn.gavin.snmp.MainController;
-import cn.gavin.snmp.core.model.DataSet;
 import cn.gavin.snmp.core.model.Device;
 import cn.gavin.snmp.core.model.DeviceImp;
-import cn.gavin.snmp.core.model.OIDImp;
-import cn.gavin.snmp.core.model.OIDValueType;
 import cn.gavin.snmp.core.model.Oid;
-import cn.gavin.snmp.core.model.StringDataSet;
 import cn.gavin.snmp.core.monitor.Group;
 
 /**
@@ -80,50 +76,17 @@ public class GroupManager extends cn.gavin.snmp.core.service.GroupManager {
         if (group.getDevice() == null) {
             throw new IllegalArgumentException("Group should always binding to a special device");
         }
-        String sql = "select * from oid where group_id = '" + group.getUuid() + "'";
-        Cursor cursor = dbHelper.query(sql);
-        String deviceId = group.getDevice().getId();
-        while (!cursor.isAfterLast()) {
-            OIDImp oid = new OIDImp(cursor.getString(cursor.getColumnIndex("oid")));
-            oid.setName(cursor.getString(cursor.getColumnIndex("oid_name")));
-            Cursor cursorValue = dbHelper.query("select * from oid_value where oid_id = '" + cursor.getString(cursor.getColumnIndex("oid_id")) + "' and device_id = '" + deviceId + "'");
-            OIDValueType type = OIDValueType.valueOf(cursor.getString(cursor.getColumnIndex("type")));
-            oid.setValueType(type);
-            DataSet valueSet;
-            switch (type) {
-                case INTEGER:
-                case Gauge32:
-                case Gauge64:
-                case TimeTicks:
-                case Counter32:
-                case Counter64:
-                    valueSet = new DataSet<Long>(oid.getOidString());
-                    break;
-                default:
-                    valueSet = new StringDataSet(oid.getOidString());
-            }
-            oid.setValues(valueSet);
-            while (!cursorValue.isAfterLast()) {
-                if (valueSet instanceof StringDataSet) {
-                    oid.appendValue(cursorValue.getLong(cursor.getColumnIndex("value_time")), cursor.getString(cursor.getColumnIndex("oid_value")));
-                } else {
-                    oid.appendValue(cursor.getLong(cursor.getColumnIndex("value_time")), cursor.getLong(cursor.getColumnIndex("oid_value")));
-                }
-                cursorValue.moveToNext();
-            }
-            cursorValue.close();
-            cursor.moveToNext();
-            group.addOID(oid);
-        }
-        cursor.close();
+        MainController.getOIDManger().retrieveOidValue(group);
         return group;
     }
+
+
 
     public void delete(Group group){
         dbHelper.execSQL("delete from oid_group where uuid = '" + group.getUuid());
         dbHelper.execSQL("delete from oid where group_id = '"+ group.getUuid() + "'");
         for(Oid oid: group.getOIDs()){
-            MainController.getOIDManger().deleteValueByOID(((OIDImp)oid).getId());
+            MainController.getOIDManger().deleteValueByOID(((Oid)oid).getId());
         }
         dbHelper.execSQL("delete from device_group where group_id = '" + group.getUuid() + "'");
     }

@@ -20,5 +20,6 @@ public enum OIDValueType {
     Counter64,
     NetworkAddress,
     ERROR,
-    TimeOut
+    TimeOut,
+    Table
 }

@@ -9,10 +9,16 @@ import java.util.List;
 import java.util.UUID;
 
 import cn.gavin.snmp.MainController;
+import cn.gavin.snmp.core.model.Credential;
+import cn.gavin.snmp.core.model.DataSet;
 import cn.gavin.snmp.core.model.DeviceImp;
+import cn.gavin.snmp.core.model.OIDValueType;
+import cn.gavin.snmp.core.model.Oid;
 import cn.gavin.snmp.core.model.Protocol;
 import cn.gavin.snmp.core.model.SNMPParameter;
 import cn.gavin.snmp.core.model.SNMPVersion;
+import cn.gavin.snmp.core.model.StringDataSet;
+import cn.gavin.snmp.core.monitor.Group;
 
 /**
  * Created by gluo on 11/7/2016.
@@ -120,13 +126,22 @@ public class DeviceManager extends cn.gavin.snmp.core.service.DeviceManager {
 
     @Override
     public DeviceImp save(DeviceImp device) {
+        Credential credential = device.getSnmpParameter();
+        if(credential.getId() == null) {
+            credential.setId(UUID.randomUUID().toString());
+            dbHelper.save("insert into community (community_id ,community_version, community_string," +
+                    "authentication , privacy, authProtocol, privacyProtocol) values('" +
+                    credential.getId() + "','" + credential.getVersion().name() + "','" + credential.getCommunity() + "','" +
+                    credential.getAuthentication() + "','" + credential.getPrivacy() + "','" + credential.getAuthProtocol().name() + "','" + credential.getPrivacyProtocol()
+                    + "')");
+        }
         if(device.getId() == null){
             StringBuilder insert = new StringBuilder("insert into device (device_id,device_ip,device_name,community_id,retry,timeout, port, trap_port) values (");
             device.setId(UUID.randomUUID().toString());
             insert.append("'").append(device.getId()).append("',");
             insert.append("'").append(device.getIp()).append("',");
             insert.append("'").append(device.getName()).append("',");
-            insert.append("'").append(device.getCommunity()).append("',");
+            insert.append("'").append(credential.getId()).append("',");
             insert.append(device.getSnmpParameter().getRetry()).append(",");
             insert.append(device.getSnmpParameter().getTimeout()).append(",");
             insert.append(device.getSnmpParameter().getPort()).append(",");
@@ -135,7 +150,7 @@ public class DeviceManager extends cn.gavin.snmp.core.service.DeviceManager {
         }else{
             StringBuilder update = new StringBuilder("update device set ");
             update.append("device_name='").append(device.getName()).append("',");
-            update.append("community_id='").append(device.getCommunity()).append("',");
+            update.append("community_id='").append(credential.getId()).append("',");
             update.append("retry=").append(device.getSnmpParameter().getRetry()).append(",");
             update.append("timeout=").append(device.getSnmpParameter().getTimeout()).append(",");
             update.append("port=").append(device.getSnmpParameter().getPort()).append(",");
@@ -143,6 +158,7 @@ public class DeviceManager extends cn.gavin.snmp.core.service.DeviceManager {
             update.append(" where device_id = '").append(device.getId());
             dbHelper.execSQL(update.toString());
         }
+
         return device;
     }
 
@@ -151,6 +167,32 @@ public class DeviceManager extends cn.gavin.snmp.core.service.DeviceManager {
         dbHelper.execSQL("delete from device where device_id = '" + deviceImp.getId() + "'");
         MainController.getOIDManger().deleteValueByDevice(deviceImp.getId());
         dbHelper.execSQL("delete from device_group where device_id = '" + deviceImp.getId() + "'");
+    }
+
+    @Override
+    public List<Credential> getAllCredentials(){
+        List<Credential> credentials = new ArrayList<Credential>();
+        Cursor cursor = dbHelper.query("select * from community");
+        while (!cursor.isAfterLast()){
+            Credential credential = new Credential();
+            credential.setId(cursor.getString(cursor.getColumnIndex("community_id")));
+            credential.setVersion(SNMPVersion.valueOf(cursor.getString(cursor.getColumnIndex("community_version"))));
+            if(credential.getVersion() == SNMPVersion.V3){
+                credential.setAuthProtocol(Protocol.valueOf(cursor.getString(cursor.getColumnIndex("authProtocol"))));
+                credential.setAuthProtocol(Protocol.valueOf(cursor.getString(cursor.getColumnIndex("privacyProtocol"))));
+                credential.setAuthentication(cursor.getString(cursor.getColumnIndex("authentication")));
+                credential.setPrivacy(cursor.getString(cursor.getColumnIndex("privacy")));
+            }else {
+                credential.setCommunity(cursor.getString(cursor.getColumnIndex("community_string")));
+            }
+            credentials.add(credential);
+        }
+        return credentials;
+    }
+
+    @Override
+    public void changeCredential(DeviceImp deviceImp){
+        dbHelper.execSQL("update device set community_id = '" + deviceImp.getSnmpParameter().getId() + "' where device_id = '" + deviceImp.getId() + "'");
     }
 
 

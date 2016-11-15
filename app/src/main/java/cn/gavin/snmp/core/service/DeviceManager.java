@@ -2,9 +2,11 @@ package cn.gavin.snmp.core.service;
 
 import android.content.Context;
 
+import cn.gavin.snmp.core.model.Credential;
 import cn.gavin.snmp.core.model.DeviceImp;
 import cn.gavin.snmp.core.model.SNMPParameter;
 import cn.gavin.snmp.core.model.SNMPVersion;
+import cn.gavin.snmp.core.monitor.Group;
 
 import java.io.IOException;
 import java.util.List;
@@ -43,4 +45,7 @@ public abstract class DeviceManager extends Manager {
     public abstract DeviceImp save(DeviceImp device);
 
     public abstract void delete(DeviceImp deviceImp);
+
+    public abstract List<Credential> getAllCredentials();
+    public abstract void changeCredential(DeviceImp deviceImp);
 }

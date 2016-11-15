@@ -13,7 +13,7 @@ import java.io.InputStreamReader;
  * Created by gluo on 11/8/2016.
  */
 public class DBHelper extends SQLiteOpenHelper {
-    private static final String DB_NAME = "";
+    private static final String DB_NAME = "snmpdatabase";
     private static final int DB_VERSION = 1;
     private static DBHelper dbHelper;
     private  Context context;
@@ -32,7 +32,6 @@ public class DBHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         try {
             SQLiteDatabase database = getWritableDatabase();
-            database.beginTransaction();
             BufferedReader reader = new BufferedReader(new InputStreamReader(context.getAssets().open("db.sql")));
             String sql = reader.readLine();
             while (sql!=null){
@@ -41,8 +40,6 @@ public class DBHelper extends SQLiteOpenHelper {
                 }
                 sql = reader.readLine();
             }
-            database.setTransactionSuccessful();
-            database.endTransaction();
         } catch (IOException e) {
             e.printStackTrace();
         }

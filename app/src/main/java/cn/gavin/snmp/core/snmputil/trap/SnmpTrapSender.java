@@ -26,6 +26,9 @@ import org.snmp4j.transport.DefaultUdpTransportMapping;
 import java.io.IOException;
 import java.util.Map;
 
+import cn.gavin.snmp.core.model.SNMPParameter;
+import cn.gavin.snmp.core.snmputil.SNMP4J;
+
 /**
  * 本类用于发送v3 Trap信息
  *
@@ -156,5 +159,9 @@ public class SnmpTrapSender {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void initSNMP(SNMPParameter parameter) throws IOException {
+        snmp = new SNMP4J(parameter).getSnmp();
     }
 }

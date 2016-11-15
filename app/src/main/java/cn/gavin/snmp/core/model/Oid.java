@@ -13,6 +13,12 @@ public class Oid {
     private Exception exception;
     private String oidString;
     private boolean isNext = false;
+    private String id;
+    private String name;
+    private DataSet dataSet;
+    private String groupId;
+    private Long lastedCollectTime;
+
 
     /**
      * Create instance by use an array of int.
@@ -153,5 +159,53 @@ public class Oid {
      */
     public OIDType getType() {
         return type;
+    }
+
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public synchronized void appendValue(Long time, Object value){
+        if(dataSet == null){
+            dataSet = new DataSet(getOidString());
+        }
+        dataSet.appendData(time, value);
+        setOidValue(value.toString());
+        lastedCollectTime = time;
+    }
+
+    public void setValues(DataSet dataSet){
+        this.dataSet = dataSet;
+        setOidValue(dataSet.getLatestData().toString());
+        lastedCollectTime = dataSet.getLatestTime();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
+    }
+
+    public Long getLastedCollectTime() {
+        return lastedCollectTime;
+    }
+
+    public void setLastedCollectTime(Long lastedCollectTime) {
+        this.lastedCollectTime = lastedCollectTime;
     }
 }

@@ -22,10 +22,13 @@ public class DeviceAdapter extends BaseAdapter implements CompoundButton.OnCheck
     List<DeviceImp> devices;
     private Set<DeviceImp> checks;
     private boolean checkAble;
+
     public DeviceAdapter(List<DeviceImp> devices, boolean checkAble) {
         this.devices = devices;
         if(checkAble) {
             checks = new HashSet<>(devices.size());
+        }else{
+            checks = new HashSet<>(devices);
         }
         this.checkAble = checkAble;
     }

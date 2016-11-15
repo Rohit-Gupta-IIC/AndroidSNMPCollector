@@ -70,10 +70,10 @@ public class DeviceImp extends Device {
     }
 
     public void doCollection() {
-        List<OIDImp> oidByDevice = MainController.getOIDManger().getOidByDevice(getId());
+        List<Oid> oidByDevice = MainController.getOIDManger().getOidByDevice(getId());
         addOids(oidByDevice.toArray(new Oid[oidByDevice.size()]));
         super.doCollection();
-        for(OIDImp oid : oidByDevice){
+        for(Oid oid : oidByDevice){
             MainController.getOIDManger().saveValue(oid, getId());
         }
     }

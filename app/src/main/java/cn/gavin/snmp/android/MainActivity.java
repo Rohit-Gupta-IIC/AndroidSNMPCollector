@@ -1,7 +1,10 @@
 package cn.gavin.snmp.android;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -14,13 +17,23 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 
+import java.lang.ref.WeakReference;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 import cn.gavin.snmp.MainController;
-import cn.gavin.snmp.db.DBHelper;
+import cn.gavin.snmp.core.model.DeviceImp;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private DBHelper dbHelper;
+    private Handler handler;
+    private DeviceAdapter adapter;
+    private Executor threadExecutor = Executors.newFixedThreadPool(5);
+    private int finishedDeviceCount;
+    private ProgressDialog discoveryProgress;
+
+    @SuppressWarnings("ConstantConditions")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,16 +59,22 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        MainController.init(this);
-        ListView devices = (ListView)findViewById(R.id.device_list_view);
-        DeviceAdapter adapter = new DeviceAdapter(MainController.getDeviceManager().getAllDevices(), false);
-        devices.setAdapter(adapter);
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                MainController.init(MainActivity.this);
+                ListView devices = (ListView) findViewById(R.id.device_list_view);
+                adapter = new DeviceAdapter(MainController.getDeviceManager().getAllDevices(), false);
+                devices.setAdapter(adapter);
+            }
+        });
+        handler = new MyHandler(this);
     }
 
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
@@ -78,6 +97,7 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            doingCollecting();
             return true;
         }
 
@@ -101,7 +121,56 @@ public class MainActivity extends AppCompatActivity
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        if (drawer != null) {
+            drawer.closeDrawer(GravityCompat.START);
+        }
         return true;
     }
+
+    private void doingCollecting() {
+        if (discoveryProgress == null) {
+            discoveryProgress = new ProgressDialog(this);
+            discoveryProgress.setMax(100);
+        }
+        discoveryProgress.show();
+        discoveryProgress.setProgress(0);
+        finishedDeviceCount = 0;
+
+        for (final DeviceImp deviceImp : adapter.getChecks()) {
+            threadExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    deviceImp.doCollection();
+                    handler.sendEmptyMessage(0);
+                }
+            });
+        }
+    }
+
+    static class MyHandler extends Handler {
+        WeakReference<MainActivity> mainActivity;
+
+        public MyHandler(MainActivity activity) {
+            mainActivity = new WeakReference<>(activity);
+        }
+
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case 0:
+                    mainActivity.get().finishedDeviceCount++;
+                    if (mainActivity.get().finishedDeviceCount >= mainActivity.get().adapter.getChecks().size()) {
+                        mainActivity.get().discoveryProgress.setProgress(100);
+                        mainActivity.get().discoveryProgress.dismiss();
+                        mainActivity.get().adapter.notifyDataSetChanged();
+                    } else {
+                        mainActivity.get().discoveryProgress.setProgress(mainActivity.get().finishedDeviceCount * 100 / mainActivity.get().adapter.getChecks().size());
+                    }
+                    break;
+                default:
+                    super.handleMessage(msg);
+            }
+        }
+    }
+
+
 }

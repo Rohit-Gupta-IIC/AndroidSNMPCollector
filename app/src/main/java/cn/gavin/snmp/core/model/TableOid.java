@@ -22,6 +22,7 @@ public class TableOid extends Oid {
         for (int i = 0; i < columns.length; i++) {
             this.columns[i] = new TableColumnOid(columns[i]);
         }
+        setValueType(OIDValueType.Table);
     }
 
     /**

@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import cn.gavin.snmp.core.exception.IPAddressFormatError;
 import cn.gavin.snmp.core.model.DeviceImp;
@@ -16,6 +17,7 @@ import cn.gavin.snmp.core.model.SNMPVersion;
 import cn.gavin.snmp.core.service.DeviceManager;
 import cn.gavin.snmp.core.service.GroupManager;
 import cn.gavin.snmp.core.service.OIDManager;
+import cn.gavin.snmp.core.snmputil.trap.SnmpTrapSender;
 
 /**
  * Created by gluo on 11/9/2016.
@@ -137,5 +139,24 @@ public class MainController {
 
     public Context getContext() {
         return context;
+    }
+
+    public void sendTrap(String ip, SNMPParameter parameter, Map<String, Object> values){
+        SnmpTrapSender snmpTrapSender = new SnmpTrapSender(ip, parameter.getTrapPort());
+        try {
+            snmpTrapSender.initSNMP(parameter);
+            snmpTrapSender.setVariableBinding(values);
+            switch (parameter.getVersion()){
+                case V1:
+                case V2C:
+                    snmpTrapSender.sendV1PDU();
+                    break;
+                case V3:
+                    snmpTrapSender.sendV3PDU();
+            }
+            snmpTrapSender.sendV1PDU();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

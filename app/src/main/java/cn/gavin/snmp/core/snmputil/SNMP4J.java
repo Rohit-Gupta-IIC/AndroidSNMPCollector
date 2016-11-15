@@ -73,6 +73,10 @@ public class SNMP4J implements SNMP {
     private PDUFactory pduFactory;
     private TableUtils tableUtils;
 
+    public Snmp getSnmp(){
+        return snmp;
+    }
+
     public SNMP4J(SNMPParameter parameter) throws IOException {
         this.parameter = parameter;
         TransportMapping transport = new DefaultUdpTransportMapping();
