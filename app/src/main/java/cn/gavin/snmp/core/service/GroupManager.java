@@ -29,4 +29,6 @@ public abstract class GroupManager extends Manager {
     }
     public abstract Group retrieveGroupData(Group group);
     public abstract void delete(Group group);
+
+    public abstract List<Group> getAllGroup();
 }
