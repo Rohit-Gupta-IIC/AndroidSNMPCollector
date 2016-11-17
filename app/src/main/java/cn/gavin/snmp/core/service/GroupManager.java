@@ -3,6 +3,7 @@ package cn.gavin.snmp.core.service;
 import android.content.Context;
 
 import cn.gavin.snmp.core.model.Device;
+import cn.gavin.snmp.core.model.DeviceImp;
 import cn.gavin.snmp.core.monitor.Group;
 
 import java.util.List;
@@ -31,4 +32,6 @@ public abstract class GroupManager extends Manager {
     public abstract void delete(Group group);
 
     public abstract List<Group> getAllGroup();
+
+    public abstract List<Group> getAllGroupByDevice(DeviceImp device);
 }

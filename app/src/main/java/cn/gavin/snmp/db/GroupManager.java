@@ -98,4 +98,33 @@ public class GroupManager extends cn.gavin.snmp.core.service.GroupManager {
     public void removeGroupFromDevice(Group group, DeviceImp device){
         dbHelper.execSQL("delete from device_group where group_id = '" + group.getUuid() + "' and device_id = '" + device.getId() + "'");
     }
+
+    @Override
+    public List<Group> getAllGroup(){
+        List<Group> groups = new ArrayList<>();
+        Cursor cursor = dbHelper.query("select * from oid_group");
+        while (!cursor.isAfterLast()){
+            Group group = new Group();
+            group.setName(cursor.getString(cursor.getColumnIndex("group_name")));
+            group.setUuid(cursor.getString(cursor.getColumnIndex("uuid")));
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return groups;
+    }
+
+    @Override
+    public List<Group> getAllGroupByDevice(DeviceImp device){
+        List<Group> groups = new ArrayList<>();
+        Cursor cursor = dbHelper.query("select * from oid_group join device_group on oid_group.uuid = device_group.group_id where device_group.device_id = '" + device.getId() + "'");
+        while (!cursor.isAfterLast()){
+            Group group = new Group();
+            group.setName(cursor.getString(cursor.getColumnIndex("group_name")));
+            group.setUuid(cursor.getString(cursor.getColumnIndex("uuid")));
+            group.setDevice(device);
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return groups;
+    }
 }

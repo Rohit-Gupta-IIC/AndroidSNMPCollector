@@ -56,4 +56,8 @@ public class TableOid extends Oid {
     public TableColumnOid[] getColumns() {
         return columns;
     }
+
+    public void setColumns(TableColumnOid[] columns){
+        this.columns = columns;
+    }
 }

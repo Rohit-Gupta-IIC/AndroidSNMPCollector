@@ -18,9 +18,11 @@ import java.util.Set;
  */
 public class TableColumnOid extends Oid {
     private Map<String, String> oidValue;
+    private Map<String, StringDataSet> oidValues;
     public TableColumnOid(String oid) {
         super(oid);
         oidValue = new HashMap<String, String>();
+        oidValues = new HashMap<>();
     }
 
     public void setOidValue(String value){
@@ -46,5 +48,15 @@ public class TableColumnOid extends Oid {
      */
     public Set<String> getIndex(){
         return oidValue.keySet();
+    }
+
+    public void appendValue(String index, String value, Long time){
+        setOidValue(index, value);
+        StringDataSet dataSet = oidValues.get(index);
+        if(dataSet == null){
+            dataSet = new StringDataSet(getOidString() + "." + index);
+            oidValues.put(index, dataSet);
+        }
+        dataSet.appendData(time, value);
     }
 }
